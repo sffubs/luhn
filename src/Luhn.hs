@@ -20,6 +20,7 @@ module Luhn(
     prop_checkSingleError
 ) where
 
+import Data.Digits
 import Test.QuickCheck
 
 -- | Like Python's enumerate function - returns a tuple where the first
@@ -31,21 +32,6 @@ enumerate xs = enumerate' 0 xs
         enumerate' counter (a:as) =
             (counter, a) : enumerate' (counter + 1) as
 
--- | Returns the digits of a number as a list, in reverse order.
-digitsRev :: Integral n => n -> [n]
-digitsRev i = case i of
-        0 -> []
-        _ -> lastDigit : digitsRev rest
-    where (rest, lastDigit) = quotRem i 10
-
--- | Returns the digits of a number as a list.
-digits :: Integral n => n -> [n]
-digits = reverse . digitsRev
-
--- | Takes a list of digits, and converts them back into a number.
-unDigits :: Integral n => [n] -> n
-unDigits = foldl (\ a b -> a * 10 + b) 0
-
 -- | Appends a Luhn check digit to the end of a number.
 addLuhnDigit :: Integral n
     => n -- ^ Number to which a Luhn check digit will be appended.
@@ -53,11 +39,11 @@ addLuhnDigit :: Integral n
 addLuhnDigit num = num * 10 + checkDigit
     where
         checkDigit = (10 - total `mod` 10) `mod` 10
-        total = sum $ concat $ map doubleEven (enumerate $ digitsRev num)
+        total = sum $ concat $ map doubleEven (enumerate $ digitsRev 10 num)
         doubleEven :: Integral n => (Int, n) -> [n]
         doubleEven (i, n) = if odd i
             then [n]
-            else digitsRev (2 * n)
+            else digitsRev 10 (2 * n)
 
 -- | Validates that the Luhn check digit (assumed to be the last/least-
 --   significant digit in the number) is correct.
@@ -66,10 +52,10 @@ checkLuhnDigit :: Integral n
     -> Bool -- ^ Whether or not the check digit is consistent.
 checkLuhnDigit num = total `mod` 10 == 0
     where
-        total = sum $ concat $ map doubleOdd (enumerate $ digitsRev num)
+        total = sum $ concat $ map doubleOdd (enumerate $ digitsRev 10 num)
         doubleOdd :: Integral n => (Int, n) -> [n]
         doubleOdd (i, n) = if odd i
-            then digitsRev (2 * n)
+            then digitsRev 10 (2 * n)
             else [n]
 
 -- | Validates that a generated check digit validates.
@@ -87,12 +73,12 @@ prop_checkSingleError
     -> Property
 prop_checkSingleError i modDigit replace = i > 0 ==>
     let checkNum = addLuhnDigit i
-        checkDigits = digits checkNum
+        checkDigits = digits 10 checkNum
         modDigit' = modDigit `mod` fromIntegral (length checkDigits - 1)
         start = take (fromIntegral modDigit') checkDigits
         rest = drop (fromIntegral (modDigit' + 1)) checkDigits
         newDigits = start ++ [replace `mod` 10] ++ rest
-        newNum =  unDigits newDigits
+        newNum =  unDigits 10 newDigits
     in
     (newNum == checkNum) || (not $ checkLuhnDigit newNum)
 
