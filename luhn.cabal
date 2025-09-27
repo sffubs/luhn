@@ -1,19 +1,24 @@
-Build-Type: Custom
-Name: luhn
-Category: Data
-Version: 0.2
-Cabal-Version: >= 1.2
-Synopsis: An implementation of Luhn's check digit algorithm.
-Description: An implementation of Luhn's check digit algorithm.
-License: BSD3
-License-File: LICENSE
-Copyright: (c) 2008-2009 N-Sim Ltd.
-Author: Henry Bucklow
-Maintainer: jhb@n-sim.com
-Tested-With: GHC==6.12
-Build-Depends: base >= 4 && < 5, QuickCheck, digits
-Exposed-Modules: Luhn
-Hs-Source-Dirs: src
-Extra-Source-Files: src/Tests.hs
-GHC-Options: -Wall
+cabal-version: 3.8
+name: luhn
+version: 0.3
+category: Data
+synopsis: An implementation of Luhn's check digit algorithm.
+description: An implementation of Luhn's check digit algorithm.
+license: BSD-3-Clause
+license-file: LICENSE
+copyright: (c) 2008-2009 N-Sim Ltd.
+author: Henry Bucklow
+maintainer: opensource@elsie.org.uk
+tested-with: GHC==9.12.2
 
+library
+    build-depends: base >= 4 && < 5, digits, QuickCheck
+    exposed-modules: Luhn
+    hs-source-dirs: src
+    ghc-options: -Wall -Werror
+
+test-suite luhn-tests
+    hs-source-dirs: test
+    main-is: Tests.hs
+    ghc-options: -Wall -Werror
+    build-depends: base >= 4 && < 5, luhn, QuickCheck

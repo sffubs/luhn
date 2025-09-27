@@ -21,7 +21,7 @@ module Luhn(
 ) where
 
 import Data.Digits
-import Test.QuickCheck
+import Test.QuickCheck hiding (total)
 
 -- | Like Python's enumerate function - returns a tuple where the first
 --   element is the index from 0 of the second element in the input list.
